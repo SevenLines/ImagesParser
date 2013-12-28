@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# http://mangafox.me
+
 import argparse
 import os
 from time import sleep
@@ -10,13 +12,12 @@ import socket
 from Parser import Parser
 from Parser import tr
 
-
-class MangaHere(Parser):
-    baseUrl = "http://www.mangahere.com/"
+class MangaFox(Parser):
+    baseUrl = "http://mangafox.me/"
     chaptersPage = "manga/"
-    chapterItemSelector = ".detail_list li span.left a"
+    chapterItemSelector = ".chlist a.tips"
     chapterItemAttr = "href"
-    pageItemSelector = ".readpage_top .go_page .right select option"
+    pageItemSelector = "#top_bar option"
     pageItemSelectorAttr = "value"
     imageItemSelector = "#image"
     imageItemSelectorAttr = "src"
@@ -29,6 +30,12 @@ class MangaHere(Parser):
     def getImageName(self, path):
         path = Parser.getImageName(self, path);
         return path.split('?')[0];
+
+    def getPagesList(self, chapterPage):
+        prefix = '/'.join(chapterPage.split('/')[:-1]) + '/'
+        pages = Parser.getPagesList(self, chapterPage)
+        pages = list(prefix + p + '.html' for p in pages)
+        return  pages
 
  
 def main():
@@ -50,10 +57,10 @@ def main():
     savePath = args.outputDir
 
     # create site parser
-    mangaHere = MangaHere()
+    mangaFox = MangaFox()
 
     #get chapters list
-    chapters = mangaHere.getChapters(args.mangaName)
+    chapters = mangaFox.getChapters(args.mangaName)
 
     # recalculate chapter list
     if lastChapter != -1:
@@ -73,8 +80,9 @@ def main():
         # skipping some chapters if nessacery
         if counter >= firstChapter:
 
-            pages = mangaHere.getPagesList(chapter)
-            saveDir = str.format('{0}/{1}', savePath, chapter)
+            pages = mangaFox.getPagesList(chapter)
+            chapterName = '/'.join(chapter.split('/')[1:-1])
+            saveDir = str.format('{0}/{1}', savePath, chapterName)
 
             # create dirs
             if not os.path.exists(saveDir):
@@ -90,15 +98,15 @@ def main():
                                  len(pages)))
 
                 # get image url
-                imageUrl = mangaHere.getImagesList(page)[0]
-                saveName = mangaHere.getImageName(imageUrl)
+                imageUrl = mangaFox.getImagesList(page)[0]
+                saveName = mangaFox.getImageName(imageUrl)
 
                 # build file name
                 saveName = str.format('{0:03d}{1}', pCounter, os.path.splitext(saveName)[-1])
                 saveName = saveDir + '/' + saveName
 
                 # get image data
-                imageData = mangaHere.getPageBytes(imageUrl, 0);
+                imageData = mangaFox.getPageBytes(imageUrl, 0);
 
                 # write file to disk
                 file = open(saveName, 'wb')
