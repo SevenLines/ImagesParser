@@ -1,7 +1,7 @@
 ImagesParser
 ===============
-ThePlace.ru parser: parse by id
+ThePlace.ru: parse by id
 
-TheMangaFox.me parser: parse by name in url
+TheMangaFox.me: parse by name in url
 
-MangaHere.com parser: parse by name in url 
+MangaHere.com: parse by name in url 
