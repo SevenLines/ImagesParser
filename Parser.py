@@ -62,6 +62,9 @@ class Parser:
     def getImageName(self, path):
         return os.path.basename(path)
 
+    # returns referer url
+    def getReferer(self):
+        return ''
 
     def getPageBytes(self, path, addDomen = 1):
         if addDomen:
@@ -74,6 +77,7 @@ class Parser:
 
         request = urllib2.Request(url);
         request.add_header('User-Agent', self.userAgent)
+        request.add_header("Referer", self.getReferer()) # should add, as some sites check for referer to exists
         if self.debugLevel == 1:
             print tr('trying to connect to "%s"' % path)
 

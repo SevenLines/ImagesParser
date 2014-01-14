@@ -26,6 +26,9 @@ class ThePlace(Parser):
     def chapterUrl(self, id):
         return  str.format("{0}?id={1}", self.chaptersPage, id )
 
+    def getReferer(self):
+        return self.baseUrl;
+
     def getChapters(self, id):
         pageUrl = self.chapterUrl(id)
         s = self.getPage(pageUrl)
