@@ -62,7 +62,11 @@ class ThePlace(Parser):
         return pages
 
 
-
+def exists_rec(path, fileName):
+    for root, subFolders, files in os.walk(path):
+        if fileName in files:
+            return 1
+    return 0
 
 def main():
 
@@ -72,13 +76,21 @@ def main():
     # parse command line args
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('personId', help="person id, for example 2275 for Megan Fox", type=str)
+    parser.add_argument('--personId', '-i', help="person id, for example 2275 for Megan Fox", default=-1, type=str)
     parser.add_argument('--outputDir', '-o', metavar="", help='output dir, by default: .', default='.', type=str)
     parser.add_argument('--firstChapter', '-f', metavar="",
                         help='the first chapter for download in the order as it appears on site', default=1, type=int)
     parser.add_argument('--lastChapter', '-l', metavar="", help='the last chapter for download', default=-1, type=int)
+    parser.add_argument('--overwrite', '-w', metavar="", help='reload picture if it exists', default=0, type=bool)
+    parser.add_argument('--makeDirs', '-d', help='set if u want to create folder for each set', default=0, type=bool)
 
     args = parser.parse_args()
+
+    if args.personId == -1:
+        value = ""
+        while not value.isdigit():
+            value = raw_input("enter person id:")
+        args.personId = value;
 
     # assign args
     firstChapter = args.firstChapter
@@ -117,12 +129,12 @@ def main():
 
             pages = the_place.getPagesList(chapter)
 
-
+            pCounter = 1
             for page in pages:
                 # inform user
                 print(str.format("[{0}/{1}] - [{2}/{3}]",
-                                 counter - firstChapter + 1,
-                                 lastChapter - firstChapter + 1,
+                                 counter,
+                                 lastChapter,
                                  pCounter,
                                  len(pages)))
 
@@ -130,22 +142,26 @@ def main():
                 imageUrl = the_place.getImagesList(page)[0]
                 saveName = the_place.getImageName(imageUrl)
 
-                saveName = saveDir + '/' + saveName
+                savePath = os.path.abspath(saveDir + '/' + saveName)
 
-                # get image data
-                imageData = the_place.getPageBytes(imageUrl, 0);
+                # check for existance
+                if not os.path.exists(savePath) or args.overwrite:
+                    # get image data
+                    imageData = the_place.getPageBytes(imageUrl, 0);
 
-                # write file to disk
-                file = open(saveName, 'wb')
-                file.write(imageData)
-                file.close()
+                    # write file to disk
+                    file = open(savePath, 'wb')
+                    file.write(imageData)
+                    file.close()
 
-                # inform user
-                print( unicode.format(tr(u'save file to: "{0}"'), saveName) )
+                    # inform user
+                    print( unicode.format(tr(u'{0} -> "{1}"'), saveName, savePath) )
 
-                # sleep a bit
-                print(tr('sleep 1 sec'))
-                sleep(1)
+                    # sleep a bit
+                    print(tr('sleep 1 sec'))
+                    sleep(1)
+                else:
+                    print( unicode.format(u'skip "{0}"', saveName))
 
                 pCounter+=1
         counter += 1

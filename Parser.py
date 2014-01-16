@@ -93,5 +93,5 @@ class Parser:
     # return page in the specific encoding of self.encoding
     def getPage(self, path):
         response = self.getPageBytes(path);
-        return response.decode(encoding=self.encoding)
+        return response.decode(self.encoding, 'ignore')
 
